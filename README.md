@@ -12,7 +12,7 @@ continued at next line with '\' before new line.
 
 ### Examples
 
-See the code examples in the [unit tests](test/property_file_tests.erl]).
+See the code examples in the [unit tests](test/property_file_tests.erl).
 
 ### Documentation
 
