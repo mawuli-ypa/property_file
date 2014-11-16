@@ -10,10 +10,14 @@ property substitution and file inclusion. It works with Unix, DOS and
 Mac files. Both formats are line-oriented, declaration may be
 continued at next line with '\' before new line.
 
-See property_file.html(EDoc generated) for documentation and
-property_file_test.erl for examples.
+### Examples
 
-You need 'mlex' to use this module.
+See the [test/property_file_tests.erl](unit tests).
+
+### Documentation
+
+Generate the docs by running ```make docs```
+
 
 Your comments and suggestions are welcome.
 
