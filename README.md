@@ -1,6 +1,7 @@
+## PropertyFile
 
-			PropertyFile 0.1
-                        ----------------
+[![Build status](https://travis-ci.org/mawuli-ypa/property_file.svg?branch=master "Build status")](https://travis-ci.org/mawuli-ypa/property_file)
+
 
 property_file is a configuration file parser.
 
