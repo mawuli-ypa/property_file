@@ -1,7 +1,7 @@
 %%%----------------------------------------------------------------------
 %%% File    : property_file_test.erl
-%%% Author  :  <svg@surnet.ru>
-%%% Purpose : 
+%%% Author  :  <svg@surnet.ru>, <mawuli@mawuli.me>
+%%% Purpose :
 %%% Created :  2 Sep 2002 by  <svg@surnet.ru>
 %%%----------------------------------------------------------------------
 %%%
@@ -18,12 +18,10 @@
 %%% Imported sources
 %%%
 %%%
-
--module(property_file_test).
+-module(property_file_tests).
 -author('svg@surnet.ru').
-
--export([test_all/0, test_all/1]).
--export([test_apache_parse/1, test_clike_parse/1, test_end_line/1]).
+-author("Mawuli Adzaku <mawuli@mawuli.me>").
+-include_lib("eunit/include/eunit.hrl").
 
 -define(match(_Pat), fun (_Res) ->
                          case _Res of
@@ -43,6 +41,7 @@
 	 {sysconfdir,["@sysconfdir@"]},
 	 {localstatedir,["@localstatedir@"]}|_]).
 
+
 -define(APACHE_MATCH, [{'ServerType',["standalone"]},
 		       {'ServerRoot',["/usr/local/psa/apache"]},
 		       {'LockFile',["logs/httpd.lock"]},
@@ -57,43 +56,57 @@
 		       {'MaxKeepAliveRequests',[1000]},
 		       {'KeepAliveTimeout',[15]},
 		       {'MinSpareServers',[5]}|_]).
-test_all([quit]) ->
-  (catch test_all()),
-  halt().
 
-test_all() ->
-  lists:foreach(fun(T) ->
-                    io:format("~n~s~n",[apply({?MODULE, T}, [info])]),
-                    apply({?MODULE, T}, [do])
-                end,
-                [test_apache_parse, test_clike_parse, test_end_line]
-               ).
+%%%----------------------------------------------------------------------
+%%% tests
+%%%----------------------------------------------------------------------
+property_file_test_() ->
+    {spawn,
+     {setup,
+      fun setup/0,
+      fun teardown/1,
+      [
+       {"Parse Apache style config file",
+        fun test_apache_parse/0},
+       {"Parse C-like config file",
+        fun test_clike_parse/0},
+       {"Test Unix, DOS and Mac end lines ",
+        fun test_end_line/0}
+     ]
+     }
+    }.
 
-test_clike_parse(info) ->
-  "*** Parse file ***";
-test_clike_parse(do) ->
+
+%%%-------------------------------------------------------------------
+%%% Setup / Cleanup
+%%%-------------------------------------------------------------------
+setup() ->
+    ok.
+
+teardown(_) ->
+    ok.
+
+test_clike_parse() ->
   FileConf = "./priv/test/clike.conf",
   Tests =
     [{"C-like config",
       [FileConf, clike, [{test_var1, "testvar1"}]],
       ?match(?CLIKE_MATCH)}
     ],
-  process_tests(fun (F, M, E) -> property_file:parse(F, M, E) end, Tests).
 
-test_apache_parse(info) ->
-  "*** Parse file ***";
-test_apache_parse(do) ->
+  ?assert(ok == process_tests(fun (F, M, E) -> property_file:parse(F, M, E) end, Tests)).
+
+test_apache_parse() ->
   FileConf = "./priv/test/httpd.conf",
   Tests =
     [{"Apache config",
       [FileConf, apache],
       ?match(?APACHE_MATCH)}
     ],
-  process_tests(fun (F, M) -> property_file:parse(F, M) end, Tests).
 
-test_end_line(info) ->
-  "*** Test Unix, DOS and Mac end lines ***";
-test_end_line(do) ->
+    ?assert(ok == process_tests(fun (F, M) -> property_file:parse(F, M) end, Tests)).
+
+test_end_line() ->
   Unix = property_file:parse("./priv/test/clike.conf", clike),
   Dos  = property_file:parse("./priv/test/clike.conf.dos", clike),
   Mac  = property_file:parse("./priv/test/clike.conf.mac", clike),
@@ -103,15 +116,14 @@ test_end_line(do) ->
      {"DOS", [Dos, Unix], true},
      {"Mac", [Mac, Unix], true}
     ],
-  process_tests(fun (List1, List2) -> List1 == List2 end, Tests).
 
-%% Test help funs
+    ?assert(ok == process_tests(fun (List1, List2) -> List1 == List2 end, Tests)).
 
-%process_tests(Tests) ->
-%  lists:foreach(fun ({Fun, FunTests}) ->
-%                    process_tests(Fun, FunTests)
-%                end, Tests).
 
+
+%%%-------------------------------------------------------------------
+%%% Test helpers
+%%%-------------------------------------------------------------------
 process_tests(Fun, Tests) ->
   process_tests(Fun, Tests, 1).
 
